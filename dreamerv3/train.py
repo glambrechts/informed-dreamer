@@ -160,6 +160,7 @@ def make_env(config, **overrides):
   suite, task = config.task.split('_', 1)
   ctor = {
       'dummy': 'embodied.envs.dummy:Dummy',
+      'hike': 'embodied.envs.hike:MountainHike',
       'gym': 'embodied.envs.from_gym:FromGym',
       'dm': 'embodied.envs.from_dmenv:FromDM',
       'crafter': 'embodied.envs.crafter:Crafter',

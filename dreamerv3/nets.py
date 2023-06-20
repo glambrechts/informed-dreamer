@@ -196,7 +196,7 @@ class MultiEncoder(nj.Module):
       symlog_inputs=False, minres=4, **kw):
     excluded = ('is_first', 'is_last')
     shapes = {k: v for k, v in shapes.items() if (
-        k not in excluded and not k.startswith('log_'))}
+        k not in excluded and not k.startswith('info_') and not k.startswith('log_'))}
     self.cnn_shapes = {k: v for k, v in shapes.items() if (
         len(v) == 3 and re.match(cnn_keys, k))}
     self.mlp_shapes = {k: v for k, v in shapes.items() if (
@@ -243,9 +243,8 @@ class MultiDecoder(nj.Module):
       self, shapes, inputs=['tensor'], cnn_keys=r'.*', mlp_keys=r'.*',
       mlp_layers=4, mlp_units=512, cnn='resize', cnn_depth=48, cnn_blocks=2,
       image_dist='mse', vector_dist='mse', resize='stride', bins=255,
-      outscale=1.0, minres=4, cnn_sigmoid=False, **kw):
-    excluded = ('is_first', 'is_last', 'is_terminal', 'reward')
-    shapes = {k: v for k, v in shapes.items() if k not in excluded}
+      outscale=1.0, minres=4, cnn_sigmoid=False, outputs='.*', **kw):
+    shapes = {k: v for k, v in shapes.items() if re.match(outputs, k)}
     self.cnn_shapes = {
         k: v for k, v in shapes.items()
         if re.match(cnn_keys, k) and len(v) == 3}

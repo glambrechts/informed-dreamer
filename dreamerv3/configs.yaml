@@ -2,7 +2,7 @@ defaults:
 
   seed: 0
   method: name
-  task: dummy_disc
+  task: hike_foo
   logdir: /dev/null
   replay: uniform
   replay_size: 1e6
@@ -48,11 +48,12 @@ defaults:
   envs: {amount: 4, parallel: process, length: 0, reset: True, restart: True, discretize: 0, checks: False}
   wrapper: {length: 0, reset: True, discretize: 0, checks: False}
   env:
-    atari: {size: [64, 64], repeat: 4, sticky: True, gray: False, actions: all, lives: unused, noops: 0, resize: opencv}
+    atari: {size: [64, 64], repeat: 4, sticky: True, gray: False, actions: all, lives: unused, noops: 0, resize: opencv, flickering: 0.0, black: true}
     dmlab: {size: [64, 64], repeat: 4, episodic: True}
     minecraft: {size: [64, 64], break_speed: 100.0}
-    dmc: {size: [64, 64], repeat: 2, camera: -1}
+    dmc: {size: [64, 64], repeat: 2, camera: -1, flickering: 0.0, black: true}
     loconav: {size: [64, 64], repeat: 2, camera: -1}
+    hike: {step_size: 0.1, transition_std: 0.05, observation_std: 0.1, discrete: false, altitude: false, rotations: false}
 
   # Agent
   task_behavior: Greedy
@@ -65,7 +66,7 @@ defaults:
   grad_heads: [decoder, reward, cont]
   rssm: {deter: 4096, units: 1024, stoch: 32, classes: 32, act: silu, norm: layer, initial: learned, unimix: 0.01, unroll: False, action_clip: 1.0, winit: normal, fan: avg}
   encoder: {mlp_keys: '.*', cnn_keys: '.*', act: silu, norm: layer, mlp_layers: 5, mlp_units: 1024, cnn: resnet, cnn_depth: 96, cnn_blocks: 0, resize: stride, winit: normal, fan: avg, symlog_inputs: True, minres: 4}
-  decoder: {mlp_keys: '.*', cnn_keys: '.*', act: silu, norm: layer, mlp_layers: 5, mlp_units: 1024, cnn: resnet, cnn_depth: 96, cnn_blocks: 0, image_dist: mse, vector_dist: symlog_mse, inputs: [deter, stoch], resize: stride, winit: normal, fan: avg, outscale: 1.0, minres: 4, cnn_sigmoid: False}
+  decoder: {mlp_keys: '.*', cnn_keys: '.*', act: silu, norm: layer, mlp_layers: 5, mlp_units: 1024, cnn: resnet, cnn_depth: 96, cnn_blocks: 0, image_dist: mse, vector_dist: symlog_mse, inputs: [deter, stoch], resize: stride, winit: normal, fan: avg, outscale: 1.0, minres: 4, cnn_sigmoid: False, outputs: '.*'}
   reward_head: {layers: 5, units: 1024, act: silu, norm: layer, dist: symlog_disc, outscale: 0.0, outnorm: False, inputs: [deter, stoch], winit: normal, fan: avg, bins: 255}
   cont_head: {layers: 5, units: 1024, act: silu, norm: layer, dist: binary, outscale: 1.0, outnorm: False, inputs: [deter, stoch], winit: normal, fan: avg}
   loss_scales: {image: 1.0, vector: 1.0, reward: 1.0, cont: 1.0, dyn: 0.5, rep: 0.1, actor: 1.0, critic: 1.0, slowreg: 1.0}
@@ -100,26 +101,6 @@ defaults:
   disag_target: [stoch]
   disag_models: 8
 
-minecraft:
-
-  task: minecraft_diamond
-  envs.amount: 16
-  run:
-    script: train_save
-    eval_fill: 1e5
-    train_ratio: 16
-    log_keys_max: '^log_inventory.*'
-  encoder: {mlp_keys: 'inventory|inventory_max|equipped|health|hunger|breath|reward', cnn_keys: 'image'}
-  decoder: {mlp_keys: 'inventory|inventory_max|equipped|health|hunger|breath', cnn_keys: 'image'}
-
-dmlab:
-
-  task: dmlab_explore_goal_locations_small
-  envs.amount: 8
-  encoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  run.train_ratio: 64
-
 atari:
 
   task: atari_pong
@@ -129,13 +110,13 @@ atari:
     eval_eps: 10
     train_ratio: 64
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  decoder: {mlp_keys: 'info_.*', cnn_keys: 'image|info_.*'}
 
 atari100k:
 
   task: atari_pong
   envs: {amount: 1}
-  env.atari: {gray: False, repeat: 4, sticky: False, noops: 30, actions: needed}
+  env.atari: {gray: False, repeat: 4, sticky: False, noops: 30, actions: needed, flickering: 0.0, black: true}
   run:
     script: train_eval
     steps: 1.5e5
@@ -149,18 +130,27 @@ atari100k:
   .*\.layers: 2
   .*\.units$: 512
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  decoder: {mlp_keys: 'info_.*', cnn_keys: 'image|info_.*'}
 
-crafter:
+hike:
 
-  task: crafter_reward
-  envs.amount: 1
+  task: hike_foo
+  envs: {amount: 8}
+  wrapper.length: 160
   run:
-    log_keys_max: '^log_achievement_.*'
-    log_keys_sum: '^log_reward$'
-  run.train_ratio: 512
-  encoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+    script: train_eval
+    steps: 1e6
+    eval_initial: False
+    eval_eps: 100
+    eval_every: 1e3
+    log_every: 1e3
+  jax.precision: float32
+  rssm.deter: 512
+  .*\.cnn_depth: 32
+  .*\.layers: 2
+  .*\.units$: 512
+  encoder: {mlp_keys: 'vector', cnn_keys: '$^'}
+  decoder: {mlp_keys: 'vector|info_.*', cnn_keys: 'info_.*'}
 
 dmc_vision:
 
@@ -173,9 +163,9 @@ dmc_vision:
   .*\.layers: 2
   .*\.units: 512
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
-  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  decoder: {mlp_keys: 'info_.*', cnn_keys: 'image|info_.*'}
 
-dmc_proprio:
+dmc_velocity:
 
   task: dmc_walker_walk
   run.train_ratio: 512
@@ -185,30 +175,8 @@ dmc_proprio:
   .*\.cnn_depth: 32
   .*\.layers: 2
   .*\.units: 512
-  encoder: {mlp_keys: '.*', cnn_keys: '$^'}
-  decoder: {mlp_keys: '.*', cnn_keys: '$^'}
-
-bsuite:
-
-  task: bsuite_mnist/0
-  envs: {amount: 1, parallel: none}
-  run:
-    script: train
-    train_ratio: 1024  # 128 for cartpole
-  rssm.deter: 512
-  .*\.cnn_depth: 32
-  .*\.layers: 2
-  .*\.units: 512
-
-loconav:
-
-  task: loconav_ant_maze_m
-  env.loconav.repeat: 2
-  run:
-    train_ratio: 512
-    log_keys_max: '^log_.*'
-  encoder: {mlp_keys: '.*', cnn_keys: 'image'}
-  decoder: {mlp_keys: '.*', cnn_keys: 'image'}
+  encoder: {mlp_keys: 'velocity|.*target.*', cnn_keys: '$^'}
+  decoder: {mlp_keys: 'velocity|.*target.*|info_.*', cnn_keys: 'info_.*'}
 
 small:
   rssm.deter: 512
