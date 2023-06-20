@@ -23,26 +23,25 @@ defaults:
     metrics_every: 10
 
   run:
-    script: train
-    steps: 1e10
+    script: train_eval
+    steps: 1e6
     expl_until: 0
     log_every: 300
-    save_every: 900
-    eval_every: 1e6
+    save_every: 2000
+    eval_every: 1e3
     eval_initial: True
-    eval_eps: 1
-    eval_samples: 1
+    eval_eps: 10
+    eval_samples: 10
     train_ratio: 32.0
     train_fill: 0
     eval_fill: 0
     log_zeros: False
-    log_keys_video: [image]
+    log_keys_video: None
     log_keys_sum: '^$'
     log_keys_mean: '(log_entropy)'
     log_keys_max: '^$'
     from_checkpoint: ''
     sync_every: 10
-    # actor_addr: 'tcp://127.0.0.1:5551'
     actor_addr: 'ipc:///tmp/5551'
     actor_batch: 32
 
@@ -140,7 +139,7 @@ atari100k:
   run:
     script: train_eval
     steps: 1.5e5
-    eval_every: 1e5
+    eval_every: 1e3
     eval_initial: False
     eval_eps: 100
     train_ratio: 1024
@@ -149,7 +148,6 @@ atari100k:
   .*\.cnn_depth: 32
   .*\.layers: 2
   .*\.units$: 512
-  actor_eval_sample: True
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
 
@@ -169,6 +167,8 @@ dmc_vision:
   task: dmc_walker_walk
   run.train_ratio: 512
   rssm.deter: 512
+  run.steps: 2e6
+  run.eval_every: 1e4
   .*\.cnn_depth: 32
   .*\.layers: 2
   .*\.units: 512
@@ -179,6 +179,8 @@ dmc_proprio:
 
   task: dmc_walker_walk
   run.train_ratio: 512
+  run.steps: 1e6
+  run.eval_every: 1e4
   rssm.deter: 512
   .*\.cnn_depth: 32
   .*\.layers: 2
@@ -247,7 +249,7 @@ multicpu:
 
 debug:
 
-  jax: {jit: True, prealloc: False, debug: True, platform: cpu}
+  jax: {jit: True, prealloc: False, debug: True, platform: gpu}
   envs: {restart: False, amount: 3}
   wrapper: {length: 100, checks: True}
   run:

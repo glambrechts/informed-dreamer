@@ -208,12 +208,12 @@ class WorldModel(nj.Module):
     recon = self.heads['decoder'](context)
     openl = self.heads['decoder'](
         self.rssm.imagine(data['action'][:6, 5:], start))
-    for key in self.heads['decoder'].cnn_shapes.keys():
-      truth = data[key][:6].astype(jnp.float32)
-      model = jnp.concatenate([recon[key].mode()[:, :5], openl[key].mode()], 1)
-      error = (model - truth + 1) / 2
-      video = jnp.concatenate([truth, model, error], 2)
-      report[f'openl_{key}'] = jaxutils.video_grid(video)
+    # for key in self.heads['decoder'].cnn_shapes.keys():
+    #   truth = data[key][:6].astype(jnp.float32)
+    #   model = jnp.concatenate([recon[key].mode()[:, :5], openl[key].mode()], 1)
+    #   error = (model - truth + 1) / 2
+    #   video = jnp.concatenate([truth, model, error], 2)
+    #   report[f'openl_{key}'] = jaxutils.video_grid(video)
     return report
 
   def _metrics(self, data, dists, post, prior, losses, model_loss):
