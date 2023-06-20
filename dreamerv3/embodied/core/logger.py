@@ -228,14 +228,14 @@ class TensorBoardOutput(AsyncOutput):
 
 class WandBOutput:
 
-  def __init__(self, pattern, logdir, config):
+  def __init__(self, logdir, config, pattern='.*'):
     self._pattern = re.compile(pattern)
     import wandb
     wandb.init(
-        project="dreamerv3",
+        project="informed-dreamer",
         name=logdir.name,
         # sync_tensorboard=True,,
-        entity='word-bots',
+        entity='your-entity',
         config=dict(config),
     )
     self._wandb = wandb
@@ -266,7 +266,7 @@ class WandBOutput:
         bystep[step][name] = wandb.Video(value)
 
     for step, metrics in bystep.items():
-      self._wandb.log(metrics, step=step)
+      wandb.log(metrics, step=step)
 
 
 class MLFlowOutput:
