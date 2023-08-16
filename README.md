@@ -9,7 +9,7 @@ If you find this code useful, please reference in your paper:
 @article{lambrechts2023informed,
   title={{Informed POMDP: Leveraging Additional Information in Model-Based RL}},
   author={Lambrechts, Gaspard and Bolland, Adrien and Ernst, Damien},
-  journal={arXiv preprint arXiv:2306.11488},
+  journal={ICML Workshop on New Frontiers in Learning, Control, and Dynamical Systems},
   year={2023},
 }
 
