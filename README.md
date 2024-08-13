@@ -6,11 +6,13 @@ Official implementation of the [Informed Dreamer][informed], an adaptation of [D
 
 If you find this code useful, please reference in your paper:
 ```
-@article{lambrechts2023informed,
-  title={{Informed POMDP: Leveraging Additional Information in Model-Based RL}},
-  author={Lambrechts, Gaspard and Bolland, Adrien and Ernst, Damien},
-  journal={ICML Workshop on New Frontiers in Learning, Control, and Dynamical Systems},
-  year={2023},
+@article{lambrechts2024informed,
+    title={Informed {POMDP}: {L}everaging Additional Information in Model-Based {RL}},
+    author={Lambrechts, Gaspard and Bolland, Adrien and Ernst, Damien},
+    journal={Reinforcement Learning Journal},
+    volume={1},
+    issue={1},
+    year={2024}
 }
 
 @article{hafner2023dreamerv3,
@@ -24,6 +26,7 @@ If you find this code useful, please reference in your paper:
 To learn more:
 
 - [Research paper][informed]
+- [Slides summary][slides]
 - [Poster summary][poster]
 - [Twitter summary][tweet]
 
@@ -85,5 +88,6 @@ python dreamerv3/train.py --logdir logs/$(date '+%Y-%m-%d_%H.%M.%S') \
 [mastering]: https://arxiv.org/abs/2301.04104
 [informed]: https://arxiv.org/abs/2306.11488
 [dreamer]: https://github.com/danijar/dreamerv3
+[slides]: https://people.montefiore.uliege.be/lambrechts/pdf/informed-pomdp.pdf
 [poster]: https://people.montefiore.uliege.be/lambrechts/pdf/informed-pomdp-poster.pdf
 [tweet]: https://twitter.com/GsprdLambrechts/status/1671465542685798400?s=20
